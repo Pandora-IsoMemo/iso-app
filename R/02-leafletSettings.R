@@ -58,12 +58,12 @@ leafletSettingsUI <- function(id, title = "") {
     )),
     fluidRow(
       column(6,
-             tags$h4("Latitude"),
-             numericInput(ns("centerLat"), "Center", value = 50, min = -90, max = 90)
+             #tags$h4("Latitude"),
+             numericInput(ns("centerLat"), "Latitude: Center", value = 50, min = -90, max = 90)
       ),
       column(6,
-             tags$h4("Longitude"),
-             numericInput(ns("centerLng"), "Center", value = 30, min = -180, max = 180)
+             #tags$h4("Longitude"),
+             numericInput(ns("centerLng"), "Longitude: Center", value = 30, min = -180, max = 180)
       )
     ),
     sliderInput(ns("boundsLat"), "Latitude: South - North", value = c(15, 60), min = -90, max = 90),
