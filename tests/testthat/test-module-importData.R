@@ -169,3 +169,11 @@ test_that("cutAllLongStrings function", {
     )
   )
 })
+
+
+test_that("Test formatColumnNames()", {
+  vNames <- c("abc", "12hgf", "#j.f", "jg-$jhfl+4", "abc.(237)")
+
+  expect_equal(formatColumnNames(vNames, isTest = TRUE),
+               c("abc", "x12hgf", "j.f", "jg..jhfl.4", "abc..237."))
+})

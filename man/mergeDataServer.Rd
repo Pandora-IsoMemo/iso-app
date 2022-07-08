@@ -4,10 +4,12 @@
 \alias{mergeDataServer}
 \title{Merge Data Server}
 \usage{
-mergeDataServer(id)
+mergeDataServer(id, mergeList)
 }
 \arguments{
 \item{id}{id of module}
+
+\item{mergeList}{(list) list of data to be merged}
 }
 \description{
 Server function of the merge data module

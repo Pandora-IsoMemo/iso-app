@@ -4,7 +4,7 @@
 \alias{getNrow}
 \title{get nRow}
 \usage{
-getNrow(headOnly, type, n = 4)
+getNrow(headOnly, type, n = 3)
 }
 \arguments{
 \item{headOnly}{(logical) if TRUE, set maximal number of rows to n}

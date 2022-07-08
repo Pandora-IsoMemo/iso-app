@@ -1,6 +1,6 @@
 Package: MpiIsoApp
 Title: Shiny App for Isotopes data base
-Version: 22.07.1
+Version: 22.07.2
 Author: INWT Statistics GmbH
 Maintainer: INWT <marcus.gross@inwt-statistics.de>
 Description: Shiny App contains: a data explorer tab, an interactive map and a static map, which should present model results.
@@ -13,6 +13,7 @@ Imports:
   coda,
   colourpicker,
   DT (>= 0.4),
+  dplyr,
   futile.logger,
   httr,
   jsonlite (>= 1.5),
@@ -28,13 +29,14 @@ Imports:
   mgcv (>= 1.8.23),
   openxlsx (>= 4.0.17),
   raster (>= 2.6.7),
+  rcarbon (>= 1.4.0),
+  RColorBrewer (>= 1.1.2),
   readODS,
   readxl,
   readr,
   Rfast (>= 2.0.0),
   rgdal,
-  RColorBrewer (>= 1.1.2),
-  rcarbon (>= 1.4.0),
+  rlang,
   shiny (>= 1.0.5),
   shinyjs (>= 1.0),
   shinyMatrix (>= 0.2.1),
@@ -42,9 +44,10 @@ Imports:
   shinyWidgets (>= 0.4.1),
   sp (>= 1.2.7),
   stringi (>= 1.1.7),
+  templates,
   webshot
 Suggests:
   lintr (>= 1.0.2),
   testthat (>= 2.0.0),
   ReSources (>= 0.7.9)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
