@@ -18,7 +18,7 @@ modelResultsDiffUI <- function(id, title = ""){
         selectInput(ns("dataSource"),
                     "Data source",
                     choices = c("Create map" = "create",
-                                "Saved map" = "model"),
+                                "Load OperatoR map" = "model"),
                     selected = "db"),
         conditionalPanel(
           condition = "input.dataSource == 'model'",
@@ -258,7 +258,7 @@ mapDiff <- function(input, output, session, savedMaps, fruitsData){
                                     savedMaps()[[as.numeric(input$targetMap2)]]$predictions,
                                     operation = input$operation)),
         value = 0,
-        message = "Generating difference map"
+        message = "Generating map"
       )
     }
   })

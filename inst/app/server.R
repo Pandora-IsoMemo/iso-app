@@ -40,7 +40,7 @@ server <- function(input, output, session) {
     )
   } else {
     appendTab(inputId = "tab",
-              savedMapsTabUI("svmt", "Saved maps")
+              savedMapsTabUI("svmt", "Saved/Create maps")
     )
   }
 
