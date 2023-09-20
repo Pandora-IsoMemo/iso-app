@@ -303,7 +303,7 @@ mapSim <- function(input, output, session, savedMaps, fruitsData){
   #   "downUpload",
   #   dat = savedMaps,
   #   inputs = input,
-  #   model = Model,
+  #   model = reactive(list(currentModel = Model(), savedMaps = savedMaps())),
   #   rPackageName = "MpiIsoApp",
   #   githubRepo = "iso-app",
   #   subFolder = "LocateR",
@@ -333,7 +333,10 @@ mapSim <- function(input, output, session, savedMaps, fruitsData){
   #
   # observe(priority = 10, {
   #   ## update model ----
-  #   Model(uploadedData$model)
+  #   Model(unpackModel(uploadedData$model))
+  #
+  #   uploadedSavedMaps <- unpackSavedMaps(uploadedData$model, currentSavedMaps = savedMaps())
+  #   savedMaps(c(savedMaps(), uploadedSavedMaps))
   # }) %>%
   #   bindEvent(uploadedData$model)
   #

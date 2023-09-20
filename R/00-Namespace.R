@@ -5,7 +5,7 @@
 #' @importFrom rcarbon calibrate sampleDates
 #' @importFrom DataTools cutAllLongStrings downUploadButtonUI downUploadButtonServer getMappingIds
 #'  getDatabaseList getMappingTable getRemoteData importDataUI importDataServer
-#'  tryCatchWithWarningsAndErrors
+#'  tryCatchWithWarningsAndErrors updateNameEntryIfDuplicate
 #' @importFrom dplyr arrange distinct filter group_by group_by_at left_join select summarise ungroup
 #' @importFrom DT datatable renderDataTable dataTableOutput
 #' @importFrom geometry convhulln inhulln

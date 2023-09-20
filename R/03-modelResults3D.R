@@ -557,7 +557,7 @@ modelResults3D <- function(input, output, session, isoData, savedMaps, fruitsDat
     "downUpload",
     dat = data,
     inputs = input,
-    model = Model,
+    model = reactive(list(currentModel = Model(), savedMaps = savedMaps())),
     rPackageName = "MpiIsoApp",
     githubRepo = "iso-app",
     subFolder = "TimeR",
@@ -589,7 +589,10 @@ modelResults3D <- function(input, output, session, isoData, savedMaps, fruitsDat
 
   observe(priority = 10, {
     ## update model ----
-    Model(uploadedData$model)
+    Model(unpackModel(uploadedData$model))
+
+    uploadedSavedMaps <- unpackSavedMaps(uploadedData$model, currentSavedMaps = savedMaps())
+    savedMaps(c(savedMaps(), uploadedSavedMaps))
   }) %>%
     bindEvent(uploadedData$model)
 

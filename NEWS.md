@@ -13,6 +13,13 @@
 ## Updates
 - removed recalculation of predictions when changing the latitude or longitude for center estimates
 
+## Version 23.06.4
+
+### New Features
+- _Export of Saved maps_ is now included within the feature to down- and upload models (#2)
+  - additionally, the list of saved models is downloaded
+  - upload checks for a list of saved maps and loads it if it is available
+
 ## Version 23.06.3
 
 ### Bug Fixes

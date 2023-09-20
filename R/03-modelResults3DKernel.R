@@ -542,7 +542,7 @@ modelResults3DKernel <- function(input, output, session, isoData, savedMaps, fru
     "downUpload",
     dat = data,
     inputs = input,
-    model = Model,
+    model = reactive(list(currentModel = Model(), savedMaps = savedMaps())),
     rPackageName = "MpiIsoApp",
     githubRepo = "iso-app",
     subFolder = "KernelTimeR",
@@ -574,7 +574,10 @@ modelResults3DKernel <- function(input, output, session, isoData, savedMaps, fru
 
   observe(priority = 10, {
     ## update model ----
-    Model(uploadedData$model)
+    Model(unpackModel(uploadedData$model))
+
+    uploadedSavedMaps <- unpackSavedMaps(uploadedData$model, currentSavedMaps = savedMaps())
+    savedMaps(c(savedMaps(), uploadedSavedMaps))
   }) %>%
     bindEvent(uploadedData$model)
 
