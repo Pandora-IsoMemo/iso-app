@@ -102,3 +102,11 @@ centerData <- function(data, center = c("Europe", "Pacific")) {
 
   return(data)
 }
+
+shiftLongitudesToPacific <- function(longitudes) {
+  longitudesOrig <- longitudes
+  longitudes[longitudesOrig < 0] <- longitudes[longitudesOrig < 0] + 180
+  longitudes[longitudesOrig >= 0] <- (-180 + longitudes[longitudesOrig >= 0])
+
+  longitudes
+}

@@ -1,6 +1,7 @@
 #' loadMaps
 #' @export
 loadMaps <- function(){
+  # we do need maps for 180 here...
   ocean <- readRDS(system.file("maps/ocean.RDS",
                                package = "MpiIsoApp"))
   grids <- readRDS(system.file("maps/grids.RDS",

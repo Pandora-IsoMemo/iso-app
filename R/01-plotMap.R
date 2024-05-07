@@ -174,18 +174,22 @@ plotMap <- function(model,
 
   if(centerMap != "Europe"){
     rangexEU <- rangex
-    rangex[rangexEU < 20] <- rangex[rangexEU < 20] + 160
-    rangex[rangexEU >= 20] <- (- 200 + rangex[rangexEU >= 20])
+    # rangex[rangexEU < 0] <- rangex[rangexEU < 0] + 180
+    # rangex[rangexEU >= 0] <- (-180 + rangex[rangexEU >= 0])
+    rangex <- shiftLongitudesToPacific(rangex)
     rangex <- rangex[order(rangex)]
     longitudesPac <- longitudes
-    longitudes[longitudesPac < 20] <- longitudes[longitudesPac < 20] + 160
-    longitudes[longitudesPac >= 20] <- (- 200 + longitudes[longitudesPac >= 20])
+    # longitudes[longitudesPac < 0] <- longitudes[longitudesPac < 0] + 180
+    # longitudes[longitudesPac >= 0] <- (-180 + longitudes[longitudesPac >= 0])
+    longitudes <- shiftLongitudesToPacific(longitudes)
     XPredPac <- XPred
-    XPred$Longitude[XPredPac$Longitude < 20] <- XPred$Longitude[XPredPac$Longitude < 20] + 160
-    XPred$Longitude[XPredPac$Longitude >= 20] <- (- 200 + XPred$Longitude[XPredPac$Longitude >= 20])
+    # XPred$Longitude[XPredPac$Longitude < 0] <- XPred$Longitude[XPredPac$Longitude < 0] + 180
+    # XPred$Longitude[XPredPac$Longitude >= 0] <- (-180 + XPred$Longitude[XPredPac$Longitude >= 0])
+    XPred$Longitude <- shiftLongitudesToPacific(XPred$Longitude)
     dataPac <- data
-    dataPac$Longitude[data$Longitude < -20] <- dataPac$Longitude[data$Longitude < -20] + 200
-    dataPac$Longitude[data$Longitude >= -20] <- (- 160 + dataPac$Longitude[data$Longitude >= -20])
+    # dataPac$Longitude[data$Longitude < -0] <- dataPac$Longitude[data$Longitude < -0] + 180
+    # dataPac$Longitude[data$Longitude >= -0] <- (- 180 + dataPac$Longitude[data$Longitude >= -0])
+    dataPac$Longitude <- shiftLongitudesToPacific(dataPac$Longitude)
   }
 
   if (interior == TRUE){
@@ -658,7 +662,7 @@ plotMap <- function(model,
                           if(centerMap != "Europe"){
                             centroids2 <- centroids
                             centroids2[,2][centroids[,2] < -20] <- centroids2[,2][centroids[,2] < -20] + 200
-                            centroids2[,2][centroids[,2] >= -20] <- (- 160 + centroids2[,2][centroids[,2] >= -20])
+                            centroids2[,2][centroids[,2] >= -20] <- (- 180 + centroids2[,2][centroids[,2] >= -20])
                             centroids <- centroids2
                           }
                         }
@@ -692,7 +696,7 @@ plotMap <- function(model,
                       if(centerMap != "Europe"){
                         lab <- pretty(rangex)
                         lab[pretty(rangex) >= 20] <- lab[pretty(rangex) >= 20] - 200
-                        lab[pretty(rangex) < 20] <- lab[pretty(rangex) < 20] + 160
+                        lab[pretty(rangex) < 20] <- lab[pretty(rangex) < 20] + 180
                         axis(1, at = pretty(rangex), labels = lab, cex.axis = AxisLSize);
                       } else{
                         axis(1, cex.axis = AxisLSize);
@@ -868,7 +872,7 @@ plotMap <- function(model,
                         if(centerMap != "Europe"){
                           centroids2 <- centroids
                           centroids2[,2][centroids[,2] < -20] <- centroids2[,2][centroids[,2] < -20] + 200
-                          centroids2[,2][centroids[,2] >= -20] <- (- 160 + centroids2[,2][centroids[,2] >= -20])
+                          centroids2[,2][centroids[,2] >= -20] <- (- 180 + centroids2[,2][centroids[,2] >= -20])
                           centroids <- centroids2
                         }
                       }
@@ -913,7 +917,7 @@ plotMap <- function(model,
                     if(centerMap != "Europe"){
                       lab <- pretty(rangex)
                       lab[pretty(rangex) >= 20] <- lab[pretty(rangex) >= 20] - 200
-                      lab[pretty(rangex) < 20] <- lab[pretty(rangex) < 20] + 160
+                      lab[pretty(rangex) < 20] <- lab[pretty(rangex) < 20] + 180
                       axis(1, at = pretty(rangex), labels = lab, cex.axis = AxisLSize);
                     } else{
                       axis(1, cex.axis = AxisLSize);
@@ -1139,15 +1143,18 @@ plotMap3D <- function(model,
 
   if(centerMap != "Europe"){
     rangexEU <- rangex
-    rangex[rangexEU < 20] <- rangex[rangexEU < 20] + 160
-    rangex[rangexEU >= 20] <- (- 200 + rangex[rangexEU >= 20])
+    # rangex[rangexEU < 20] <- rangex[rangexEU < 20] + 160
+    # rangex[rangexEU >= 20] <- (- 200 + rangex[rangexEU >= 20])
+    rangex <- shiftLongitudesToPacific(rangex)
     rangex <- rangex[order(rangex)]
     longitudesPac <- longitudes
-    longitudes[longitudesPac < 20] <- longitudes[longitudesPac < 20] + 160
-    longitudes[longitudesPac >= 20] <- (- 200 + longitudes[longitudesPac >= 20])
+    # longitudes[longitudesPac < 20] <- longitudes[longitudesPac < 20] + 160
+    # longitudes[longitudesPac >= 20] <- (- 200 + longitudes[longitudesPac >= 20])
+    longitudes <- shiftLongitudesToPacific(longitudes)
     XPredPac <- XPred
-    XPred$Longitude[XPredPac$Longitude < 20] <- XPred$Longitude[XPredPac$Longitude < 20] + 160
-    XPred$Longitude[XPredPac$Longitude >= 20] <- (- 200 + XPred$Longitude[XPredPac$Longitude >= 20])
+    # XPred$Longitude[XPredPac$Longitude < 20] <- XPred$Longitude[XPredPac$Longitude < 20] + 160
+    # XPred$Longitude[XPredPac$Longitude >= 20] <- (- 200 + XPred$Longitude[XPredPac$Longitude >= 20])
+    XPred$Longitude <- shiftLongitudesToPacific(XPred$Longitude)
     XPred$Longitude2 = (XPred$Longitude - mean(data$Longitude)) / sd(data$Longitude)
     dataPac <- data %>%
       centerPlotData(centerMap = centerMap)
@@ -1601,10 +1608,11 @@ plotMap3D <- function(model,
                         }
                         centroids <- centroids[order(centroids[,1]), ]
                         if(centerMap != "Europe"){
-                          centroidsPac <- centroids
-                          centroidsPac[,2][centroids[,2] < -20] <- centroidsPac[,2][centroids[,2] < -20] + 200
-                          centroidsPac[,2][centroids[,2] >= -20] <- (- 160 + centroidsPac[,2][centroids[,2] >= -20])
-                          centroids <- centroidsPac
+                          # centroidsPac <- centroids
+                          # centroidsPac[,2][centroids[,2] < -20] <- centroidsPac[,2][centroids[,2] < -20] + 200
+                          # centroidsPac[,2][centroids[,2] >= -20] <- (- 160 + centroidsPac[,2][centroids[,2] >= -20])
+                          # centroids <- centroidsPac
+                          centroids <- shiftLongitudesToPacific(centroids)
                         }
                       }
 
@@ -1669,8 +1677,9 @@ plotMap3D <- function(model,
                     # update axis if center Pacific
                     if (centerMap != "Europe") {
                       lab <- pretty(rangex)
-                      lab[pretty(rangex) >= 20] <- lab[pretty(rangex) >= 20] - 200
-                      lab[pretty(rangex) < 20] <- lab[pretty(rangex) < 20] + 160
+                      # lab[pretty(rangex) >= 20] <- lab[pretty(rangex) >= 20] - 200
+                      # lab[pretty(rangex) < 20] <- lab[pretty(rangex) < 20] + 160
+                      lab <- shiftLongitudesToPacific(pretty(rangex))
                       axis(1, at = pretty(rangex), labels = lab, cex.axis = AxisLSize);
                     } else{
                       axis(1, cex.axis = AxisLSize);
@@ -1905,8 +1914,9 @@ plotDS <- function(XPred,
 
   if(centerMap != "Europe"){
     XPredPac <- XPred
-    XPredPac$Longitude[XPred$Longitude < -20] <- XPredPac$Longitude[XPred$Longitude < -20] + 200
-    XPredPac$Longitude[XPred$Longitude >= -20] <- (- 160 + XPredPac$Longitude[XPred$Longitude >= -20])
+    # XPredPac$Longitude[XPred$Longitude < -20] <- XPredPac$Longitude[XPred$Longitude < -20] + 200
+    # XPredPac$Longitude[XPred$Longitude >= -20] <- (- 160 + XPredPac$Longitude[XPred$Longitude >= -20])
+    XPredPac$Longitude <- shiftLongitudesToPacific(XPred$Longitude)
     XPredPlot <- data.frame(XPredPac[order(XPredPac$Latitude, XPredPac$Longitude),])
     z <- matrix(XPredPlot$Est, ncol = length(unique(XPredPlot$Latitude)))
   } else {
@@ -2009,8 +2019,9 @@ plotDS <- function(XPred,
                     }
                     if(centerMap != "Europe"){
                       lab <- pretty(rangex)
-                      lab[pretty(rangex) >= 20] <- lab[pretty(rangex) >= 20] - 200
-                      lab[pretty(rangex) < 20] <- lab[pretty(rangex) < 20] + 160
+                      # lab[pretty(rangex) >= 20] <- lab[pretty(rangex) >= 20] - 200
+                      # lab[pretty(rangex) < 20] <- lab[pretty(rangex) < 20] + 160
+                      lab <- shiftLongitudesToPacific(pretty(rangex))
                       axis(1, at = pretty(rangex), labels = lab, cex.axis = AxisLSize);
                     } else{
                       axis(1, cex.axis = AxisLSize);
