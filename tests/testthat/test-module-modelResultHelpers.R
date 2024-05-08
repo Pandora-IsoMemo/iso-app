@@ -96,8 +96,8 @@ test_that("Test extractZoomFromLongRange", {
 
   expect_equal(extractZoomFromLongRange(rangeLongitude = c(13, 97), mapCentering = centering), 86)
   expect_equal(extractZoomFromLongRange(rangeLongitude = c(3, 9), mapCentering = centering), 8)
-  expect_equal(extractZoomFromLongRange(rangeLongitude = c(-10, 84), mapCentering = centering), 96)
-  expect_equal(extractZoomFromLongRange(rangeLongitude = c(-60, 50), mapCentering = centering), 252)
+  expect_equal(extractZoomFromLongRange(rangeLongitude = c(-10, 84), mapCentering = centering), 268)
+  expect_equal(extractZoomFromLongRange(rangeLongitude = c(-60, 50), mapCentering = centering), 112)
   })
 
 
@@ -130,4 +130,3 @@ test_that("Test getDefaultZ", {
   expect_equal(getDefaultZMax(c(4, 50000)), 55000)
   expect_equal(getDefaultZMax(c(4, 4)), 4.0004)
 })
-

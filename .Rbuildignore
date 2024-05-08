@@ -13,3 +13,5 @@
 ^deploy\.sh$
 ^\..*$
 ^\.Rproj\.user$
+^doc$
+^Meta$

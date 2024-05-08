@@ -98,23 +98,15 @@ estimateMap <- function(data,
       all(is.na(data[, Longitude])) || all(is.na(data[, Latitude])) )
     return("Longitude or Latitude not available.")
 
-  # shift data such that it is in the range of -180 to 180 and -90 to 90
-  data <- shiftDataToDefaultRestriction(data)
+  # process coordinate data
+  data <- data %>%
+    shiftDataToDefaultRestriction() %>%
+    removeDataOutsideRestriction(Latitude = Latitude,
+                                 Longitude = Longitude,
+                                 restriction = restriction)
 
-  # remove data outside of restriction
-  if (restriction[4] >= restriction[3]) {
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   data[, Longitude] <= restriction[4] &
-                   data[, Longitude] >= restriction[3], ]
-  } else {
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   !(data[, Longitude] <= restriction[3] &
-                       data[, Longitude] >= restriction[4]), ]
-  }
-
-  if ( (!is.numeric(data[, independent]) || all(is.na(data[, independent]))) & IndependentType == "numeric") return("non-numeric independent variable")
+  if ( (!is.numeric(data[, independent]) || all(is.na(data[, independent]))) & IndependentType == "numeric")
+    return("non-numeric independent variable")
 
   if ( Site != "" && all(is.na(data[, Site]))) return("wrong site variable")
   if ( Site == ""){
@@ -416,6 +408,8 @@ estimateMapSpread <- function(data,
                               spreadQ = 0.01,
                               minValue = -Inf){
   set.seed(1234)
+  center <- match.arg(center)
+
   dataOrg <- data
   if (is.null(data)) return(NULL)
   if (Longitude == "" || Latitude == "" || DateOne == "") return(NULL)
@@ -430,21 +424,12 @@ estimateMapSpread <- function(data,
   if (!all(c(Longitude, Latitude) %in% names(data)) ||
       all(is.na(data[, Longitude])) || all(is.na(data[, Latitude])) ) return("Longitude or Latitude not available.")
 
-  # shift data such that it is in the range of -180 to 180 and -90 to 90
-  data <- shiftDataToDefaultRestriction(data)
-
-  # remove data outside of restriction
-  if(restriction[4] >= restriction[3]){
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   data[, Longitude] <= restriction[4] &
-                   data[, Longitude] >= restriction[3], ]
-  } else {
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   !(data[, Longitude] <= restriction[3] &
-                       data[, Longitude] >= restriction[4]), ]
-  }
+  # process coordinate data
+  data <- data %>%
+    shiftDataToDefaultRestriction() %>%
+    removeDataOutsideRestriction(Latitude = Latitude,
+                                 Longitude = Longitude,
+                                 restriction = restriction)
 
   data <- data %>%
     prepareDate(DateOne = DateOne,
@@ -514,46 +499,8 @@ estimateMapSpread <- function(data,
   }
 
   ### data augmentation ----
-  if (correctionPac & splineType == 1 & (max(data$Latitude) > 75 ||
-                                         max(data$Longitude) > 150 ||
-                                         min(data$Longitude) < -150 || min(data$Latitude) < -75)) {
-    dataBottom  <- data
-    dataTop  <- data
-    dataLeft  <- data
-    dataRight  <- data
-    dataLeftBottom <- data
-    dataLeftTop <- data
-    dataRightBottom <- data
-    dataRightTop <- data
-
-    dataBottom$Latitude <- -90 - (dataBottom$Latitude + 90)
-    dataBottom$Longitude <- dataBottom$Longitude + 180
-    dataBottom$Longitude[dataBottom$Longitude >= 180] <- dataBottom$Longitude[dataBottom$Longitude >= 180] - 360
-
-    dataTop$Latitude <- 90 + (90 - dataTop$Latitude)
-    dataTop$Longitude <- dataTop$Longitude + 180
-    dataTop$Longitude[dataTop$Longitude >= 180] <- dataTop$Longitude[dataTop$Longitude >= 180] - 360
-
-    dataLeft$Longitude <- -180 - (-dataLeft$Longitude + 180)
-    dataRight$Longitude <- 180 + (180 + dataRight$Longitude)
-
-    dataLeftBottom$Longitude <- dataBottom$Longitude - 360
-    dataLeftBottom$Latitude <- dataBottom$Latitude
-
-    dataLeftTop$Longitude <- dataTop$Longitude - 360
-    dataLeftTop$Latitude <- dataTop$Latitude
-
-    dataRightBottom$Longitude <- dataBottom$Longitude + 360
-    dataRightBottom$Latitude <- dataBottom$Latitude
-
-    dataRightTop$Longitude <- dataTop$Longitude + 360
-    dataRightTop$Latitude <- dataTop$Latitude
-    data2 <- rbind(data, dataLeft, dataRight, dataBottom, dataTop,
-                   dataLeftBottom, dataLeftTop,
-                   dataRightBottom, dataRightTop)
-    #data2 <- rbind(data, dataLeft, dataRight, dataBottom, dataTop)
-    data2 <- data2[data2$Latitude > -90 & data2$Latitude < 90 &
-                     data2$Longitude > -320 & data2$Longitude < 320, ]
+  if (correctionPac && splineType == 1 && center == "Europe") {
+    data2 <- augmentData(data)
     K <- ceiling(K * nrow(data2) / nrow(data))
   } else {
     data2 <- data
@@ -604,7 +551,7 @@ estimateMapSpreadWrapper <- function(data, input) {
                           iter = input$Iter, burnin = input$burnin,
                           nChains = input$nChains, MinMax = input$MinMax, DateOne = input$DateOne,
                           DateTwo = input$DateTwo, DateType = input$DateType,
-                          Longitude = input$Longitude, Latitude = input$Latitude,
+                          Longitude = input$Longitude, Latitude = input$Latitude, center = input$centerOfData,
                           CoordType = input$coordType,
                           penalty = as.numeric(input$Penalty),
                           splineType = as.numeric(input$SplineType),
@@ -735,6 +682,7 @@ estimateMap3D <- function(data,
                           correctionPac = FALSE,
                           thinning = 2) {
   set.seed(1234)
+  center <- match.arg(center)
 
   dataOrg <- data
   if (is.null(data)) return(NULL)
@@ -763,21 +711,12 @@ estimateMap3D <- function(data,
   if (!all(c(Longitude, Latitude) %in% names(data)) ||
       all(is.na(data[, Longitude])) || all(is.na(data[, Latitude])) ) return("Longitude or Latitude not available.")
 
-  # shift data such that it is in the range of -180 to 180 and -90 to 90
-  data <- shiftDataToDefaultRestriction(data)
-
-  # remove data outside of restriction
-  if(restriction[4] >= restriction[3]){
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   data[, Longitude] <= restriction[4] &
-                   data[, Longitude] >= restriction[3], ]
-  } else {
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   !(data[, Longitude] <= restriction[3] &
-                       data[, Longitude] >= restriction[4]), ]
-  }
+  # process coordinate data
+  data <- data %>%
+    shiftDataToDefaultRestriction() %>%
+    removeDataOutsideRestriction(Latitude = Latitude,
+                                 Longitude = Longitude,
+                                 restriction = restriction)
 
   if (Site == ""){
     data$Site = 1:nrow(data)
@@ -861,51 +800,10 @@ estimateMap3D <- function(data,
   }
 
   ### data augmentation ----
-  if (correctionPac & splineType == 1 & (max(data$Latitude) > 75 ||
-                                         max(data$Longitude) > 150 ||
-                                         min(data$Longitude) < -150 || min(data$Latitude) < -75)) {
-    dataBottom  <- data
-    dataTop  <- data
-    dataLeft  <- data
-    dataRight  <- data
-    dataLeftBottom <- data
-    dataLeftTop <- data
-    dataRightBottom <- data
-    dataRightTop <- data
-
-    dataBottom$Latitude <- -90 - (dataBottom$Latitude + 90)
-    dataBottom$Longitude <- dataBottom$Longitude + 180
-    dataBottom$Longitude[dataBottom$Longitude >= 180] <- dataBottom$Longitude[dataBottom$Longitude >= 180] - 360
-
-    dataTop$Latitude <- 90 + (90 - dataTop$Latitude)
-    dataTop$Longitude <- dataTop$Longitude + 180
-    dataTop$Longitude[dataTop$Longitude >= 180] <- dataTop$Longitude[dataTop$Longitude >= 180] - 360
-
-    dataLeft$Longitude <- -180 - (-dataLeft$Longitude + 180)
-    dataRight$Longitude <- 180 + (180 + dataRight$Longitude)
-
-    dataLeftBottom$Longitude <- dataBottom$Longitude - 360
-    dataLeftBottom$Latitude <- dataBottom$Latitude
-
-    dataLeftTop$Longitude <- dataTop$Longitude - 360
-    dataLeftTop$Latitude <- dataTop$Latitude
-
-    dataRightBottom$Longitude <- dataBottom$Longitude + 360
-    dataRightBottom$Latitude <- dataBottom$Latitude
-
-    dataRightTop$Longitude <- dataTop$Longitude + 360
-    dataRightTop$Latitude <- dataTop$Latitude
-    data2 <- rbind(data, dataLeft, dataRight, dataBottom, dataTop,
-                   dataLeftBottom, dataLeftTop,
-                   dataRightBottom, dataRightTop)
-    #data2 <- rbind(data, dataLeft, dataRight, dataBottom, dataTop)
-    data2 <- data2[data2$Latitude > -90 & data2$Latitude < 90 &
-                     data2$Longitude > -320 & data2$Longitude < 320, ]
+  if (correctionPac && splineType == 1 && center == "Europe") {
+    data2 <- augmentData(data)
     data2$Longitude2 <- (data2$Longitude - mean(data$Longitude)) / (sd(data$Longitude))
     data2$Latitude2 <- (data2$Latitude - mean(data$Latitude)) / (sd(data$Latitude))
-    if (length(unique(data$Site)) == nrow(data)){
-      data2$Site = 1:nrow(data2)
-    }
     K <- ceiling(K * nrow(data2) / nrow(data))
   } else {
     data2 <- data
@@ -1030,7 +928,7 @@ estimateMap3DWrapper <- function(data, input) {
         data <- estimateMap3D(data = data, Bayes = FALSE, independent = input$IndependentX,
                             independentUncertainty = input$IndependentUnc,
                             IndependentType = input$IndependentType,
-                            Longitude = input$Longitude, Latitude = input$Latitude,
+                            Longitude = input$Longitude, Latitude = input$Latitude, center = input$centerOfData,
                             Site = input$Site, CoordType = input$coordType,
                             iter = input$Iter, burnin = input$burnin,
                             nChains = input$nChains, DateOne = input$DateOne,
@@ -2125,6 +2023,8 @@ estimateMapKernel <- function(data,
                               restriction = c(-90, 90, -180, 180),
                               nSim = 10,
                               kdeType = "1"){
+  center <- match.arg(center)
+
   dataOrg <- data
   if ( is.null(data)) return(NULL)
   if (Longitude == "" || Latitude == "") return(NULL)
@@ -2142,21 +2042,12 @@ estimateMapKernel <- function(data,
   if (!all(c(Longitude, Latitude) %in% names(data)) ||
       all(is.na(data[, Longitude])) || all(is.na(data[, Latitude])) ) return("Longitude or Latitude not available.")
 
-  # shift data such that it is in the range of -180 to 180 and -90 to 90
-  data <- shiftDataToDefaultRestriction(data)
-
-  # remove data outside of restriction
-  if(restriction[4] >= restriction[3]){
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   data[, Longitude] <= restriction[4] &
-                   data[, Longitude] >= restriction[3], ]
-  } else {
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   !(data[, Longitude] <= restriction[3] &
-                       data[, Longitude] >= restriction[4]), ]
-  }
+  # process coordinate data
+  data <- data %>%
+    shiftDataToDefaultRestriction() %>%
+    removeDataOutsideRestriction(Latitude = Latitude,
+                                 Longitude = Longitude,
+                                 restriction = restriction)
 
   if(!is.null(independent) & !(independent == "")){
     if(!is.null(Weighting) & !(Weighting == "")){
@@ -2180,71 +2071,28 @@ estimateMapKernel <- function(data,
   data$Longitude <- data[, Longitude]
   data$Latitude <- data[, Latitude]
 
-  ### data augmentation
-  if (max(data$Latitude) > 75 ||
-      max(data$Longitude) > 150 ||
-      min(data$Longitude) < -150 || min(data$Latitude) < -75) {
-    dataBottom  <- data
-    dataTop  <- data
-    dataLeft  <- data
-    dataRight  <- data
-    dataLeftBottom <- data
-    dataLeftTop <- data
-    dataRightBottom <- data
-    dataRightTop <- data
-
-    dataBottom$Latitude <- -90 - (dataBottom$Latitude + 90)
-    dataBottom$Longitude <- dataBottom$Longitude + 180
-    dataBottom$Longitude[dataBottom$Longitude >= 180] <- dataBottom$Longitude[dataBottom$Longitude >= 180] - 360
-
-    dataTop$Latitude <- 90 + (90 - dataTop$Latitude)
-    dataTop$Longitude <- dataTop$Longitude + 180
-    dataTop$Longitude[dataTop$Longitude >= 180] <- dataTop$Longitude[dataTop$Longitude >= 180] - 360
-
-    dataLeft$Longitude <- -180 - (-dataLeft$Longitude + 180)
-    dataRight$Longitude <- 180 + (180 + dataRight$Longitude)
-
-    dataLeftBottom$Longitude <- dataBottom$Longitude - 360
-    dataLeftBottom$Latitude <- dataBottom$Latitude
-
-    dataLeftTop$Longitude <- dataTop$Longitude - 360
-    dataLeftTop$Latitude <- dataTop$Latitude
-
-    dataRightBottom$Longitude <- dataBottom$Longitude + 360
-    dataRightBottom$Latitude <- dataBottom$Latitude
-
-    dataRightTop$Longitude <- dataTop$Longitude + 360
-    dataRightTop$Latitude <- dataTop$Latitude
-    data2 <- rbind(data, dataLeft, dataRight, dataBottom, dataTop,
-                   dataLeftBottom, dataLeftTop,
-                   dataRightBottom, dataRightTop)
-    #data2 <- rbind(data, dataLeft, dataRight, dataBottom, dataTop)
-    data2 <- data2[data2$Latitude > -120 & data2$Latitude < 120 &
-                     data2$Longitude > -240 & data2$Longitude < 240, ]
-  } else {
-    data2 <- data
-  }
-
-  ### data centering ----
-  data2 <- centerData(data2, center = center)
+  ### data augmentation ----
+  data2 <- data %>%
+    augmentData(restriction = c(-120, 120, -240, 240)) %>%
+    centerData(center = center)
 
   # calculate model ----
   set.seed(1234)
   if(clusterMethod == "kmeans"){
-    clust <- kmeans(cbind(data$Longitude, data$Latitude), nClust, nstart = 25, algorithm = kMeansAlgo)
-    data$cluster <- clust$cluster
+    clust <- kmeans(cbind(data2$Longitude, data2$Latitude), nClust, nstart = 25, algorithm = kMeansAlgo)
+    data2$cluster <- clust$cluster
     clust <- as.data.frame(clust$centers)
     names(clust) <- c("long_centroid_spatial_cluster", "lat_centroid_spatial_cluster")
     clust$cluster <- 1:nrow(clust)
-    data <- merge(data, clust, sort = FALSE)
-    colnames(data)[colnames(data)=="cluster"] <- "spatial_cluster"
+    data2 <- merge(data2, clust, sort = FALSE)
+    colnames(data2)[colnames(data2)=="cluster"] <- "spatial_cluster"
   } else if (clusterMethod == "mclust"){
 
     numClusters <- seq(nClustRange[1],nClustRange[2])
     cluster_list <- vector("list", length(numClusters))
     for(i in 1:length(numClusters)){
         set.seed(1234)
-      cluster_list[[i]] <- mclust::Mclust(data[,c("Longitude","Latitude")], G = numClusters[i])
+      cluster_list[[i]] <- mclust::Mclust(data2[,c("Longitude","Latitude")], G = numClusters[i])
     }
 
     # select best cluster solution based on bic
@@ -2252,14 +2100,14 @@ estimateMapKernel <- function(data,
                                              function(x) cluster_list[[x]]$bic))]]
 
     # assign cluster to data
-    data$cluster <- cluster_solution$classification
+    data2$cluster <- cluster_solution$classification
 
     # merge cluster centers
     cluster_centers <- data.frame(t(cluster_solution$parameters$mean))
     colnames(cluster_centers) <- c("long_centroid_spatial_cluster", "lat_centroid_spatial_cluster")
     cluster_centers$cluster <- 1:nrow(cluster_centers)
-    data <- merge(data, cluster_centers, sort = FALSE)
-    colnames(data)[colnames(data)=="cluster"] <- "spatial_cluster"
+    data2 <- merge(data2, cluster_centers, sort = FALSE)
+    colnames(data2)[colnames(data2)=="cluster"] <- "spatial_cluster"
   }
   if(!is.null(Weighting) & !(Weighting == "")){
     model <- try(lapply(1:nSim, function(x){
@@ -2310,7 +2158,7 @@ estimateMapKernelWrapper <- function(data, input) {
     }
 
     estimateMapKernel(data = data, independent = input$IndependentX,
-                Longitude = input$Longitude, Latitude = input$Latitude,
+                Longitude = input$Longitude, Latitude = input$Latitude, center = input$centerOfData,
                 CoordType = input$CoordType,
                 Weighting = input$Weighting,
                 clusterMethod = input$clusterMethod,
@@ -2377,8 +2225,8 @@ estimateMap3DKernel <- function(data,
                                 restriction = c(-90, 90, -180, 180),
                                 nSim = 10,
                                 kdeType = "1") {
+  center <- match.arg(center)
 
-  dataOrg <- data
   if (is.null(data)) return(NULL)
   if (Longitude == "" || Latitude == "" || DateOne == "") return(NULL)
   if (!(all(c(Longitude, Latitude, DateOne) %in% names(data)))) return(NULL)
@@ -2404,21 +2252,12 @@ estimateMap3DKernel <- function(data,
   if (!all(c(Longitude, Latitude) %in% names(data)) ||
       all(is.na(data[, Longitude])) || all(is.na(data[, Latitude])) ) return("Longitude or Latitude not available.")
 
-  # shift data such that it is in the range of -180 to 180 and -90 to 90
-  data <- shiftDataToDefaultRestriction(data)
-
-  # remove data outside of restriction
-  if(restriction[4] >= restriction[3]){
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   data[, Longitude] <= restriction[4] &
-                   data[, Longitude] >= restriction[3], ]
-  } else {
-    data <- data[data[, Latitude] <= restriction[2] &
-                   data[, Latitude] >= restriction[1] &
-                   !(data[, Longitude] <= restriction[3] &
-                       data[, Longitude] >= restriction[4]), ]
-  }
+  # process coordinate data
+  data <- data %>%
+    shiftDataToDefaultRestriction() %>%
+    removeDataOutsideRestriction(Latitude = Latitude,
+                                 Longitude = Longitude,
+                                 restriction = restriction)
 
   if (DateType == "Interval"){
     if(!is.null(independent) & !(independent == "")){
@@ -2495,52 +2334,9 @@ estimateMap3DKernel <- function(data,
   data$Latitude <- data[, Latitude]
 
   ### data augmentation ----
-  if (max(data$Latitude) > 75 ||
-      max(data$Longitude) > 150 ||
-      min(data$Longitude) < -150 || min(data$Latitude) < -75) {
-    dataBottom  <- data
-    dataTop  <- data
-    dataLeft  <- data
-    dataRight  <- data
-    dataLeftBottom <- data
-    dataLeftTop <- data
-    dataRightBottom <- data
-    dataRightTop <- data
-
-    dataBottom$Latitude <- -90 - (dataBottom$Latitude + 90)
-    dataBottom$Longitude <- dataBottom$Longitude + 180
-    dataBottom$Longitude[dataBottom$Longitude >= 180] <- dataBottom$Longitude[dataBottom$Longitude >= 180] - 360
-
-    dataTop$Latitude <- 90 + (90 - dataTop$Latitude)
-    dataTop$Longitude <- dataTop$Longitude + 180
-    dataTop$Longitude[dataTop$Longitude >= 180] <- dataTop$Longitude[dataTop$Longitude >= 180] - 360
-
-    dataLeft$Longitude <- -180 - (-dataLeft$Longitude + 180)
-    dataRight$Longitude <- 180 + (180 + dataRight$Longitude)
-
-    dataLeftBottom$Longitude <- dataBottom$Longitude - 360
-    dataLeftBottom$Latitude <- dataBottom$Latitude
-
-    dataLeftTop$Longitude <- dataTop$Longitude - 360
-    dataLeftTop$Latitude <- dataTop$Latitude
-
-    dataRightBottom$Longitude <- dataBottom$Longitude + 360
-    dataRightBottom$Latitude <- dataBottom$Latitude
-
-    dataRightTop$Longitude <- dataTop$Longitude + 360
-    dataRightTop$Latitude <- dataTop$Latitude
-    data2 <- rbind(data, dataLeft, dataRight, dataBottom, dataTop,
-                   dataLeftBottom, dataLeftTop,
-                   dataRightBottom, dataRightTop)
-    #data2 <- rbind(data, dataLeft, dataRight, dataBottom, dataTop)
-    data2 <- data2[data2$Latitude > -120 & data2$Latitude < 120 &
-                     data2$Longitude > -240 & data2$Longitude < 240, ]
-  } else {
-    data2 <- data
-  }
-
-  ### data centering ----
-  data2 <- centerData(data2, center = center)
+  data2 <- data %>%
+    augmentData(restriction = c(-120, 120, -240, 240)) %>%
+    centerData(center = center)
 
   # calculate model ----
   set.seed(1234)
@@ -2738,7 +2534,7 @@ estimateMap3DKernelWrapper <- function(data, input) {
 
   estimateMap3DKernel(
     data = data, independent = input$IndependentX,
-    Longitude = input$Longitude, Latitude = input$Latitude,
+    Longitude = input$Longitude, Latitude = input$Latitude, center = input$centerOfData,
     CoordType = input$coordType, DateOne = input$DateOne,
     DateTwo = input$DateTwo, DateType = input$DateType,
     Weighting = input$Weighting,

@@ -5,6 +5,7 @@
 respective longitudes (#196)
   - if "0th meridian" longitudes are transposed to the range (-180, 180)
   - if "180th meridian" longitudes are transposed to the range (0, 360)
+- a vignette was added to the package describing features for the processing of coordinate data (#196)
 
 # MpiIsoApp 24.05.0
 
